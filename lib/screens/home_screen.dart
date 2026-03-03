@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'feed_screen.dart';
+import 'notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,6 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _pages = [
     const FeedScreen(),
+    const NotificationScreen(),
     const ChatListContent(),
   ];
 
@@ -22,19 +24,74 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _showFabMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.group, color: Color(0xFF527DA3)),
+                title: const Text('New Group'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.chat, color: Color(0xFF527DA3)),
+                title: const Text('New Chat'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    String titleText = 'Newsfeed';
+    if (_selectedIndex == 1) titleText = 'Notifications';
+    if (_selectedIndex == 2) titleText = 'DreamLink';
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(_selectedIndex == 0 ? 'Newsfeed' : 'Telegram'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          titleText,
+          style: const TextStyle(
+            color: Color(0xFF527DA3),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(Icons.search, color: Color(0xFF527DA3)),
             onPressed: () {},
+          ),
+          GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/profile'),
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircleAvatar(
+                backgroundColor: Color(0xFF527DA3),
+                child: Icon(Icons.person, size: 20, color: Colors.white),
+              ),
+            ),
           ),
         ],
       ),
-      drawer: const AppDrawer(),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -44,6 +101,11 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Feed',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.notifications_none),
+            activeIcon: Icon(Icons.notifications),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.chat_bubble_outline),
             activeIcon: Icon(Icons.chat_bubble),
             label: 'Chats',
@@ -51,11 +113,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: const Color(0xFF527DA3),
+        unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
         onTap: _onItemTapped,
       ),
-      floatingActionButton: _selectedIndex == 1
+      floatingActionButton: _selectedIndex == 2
           ? FloatingActionButton(
-              onPressed: () {},
+              onPressed: () => _showFabMenu(context),
               child: const Icon(Icons.edit),
             )
           : null,
@@ -68,13 +133,26 @@ class ChatListContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<Color> avatarColors = [
+      Colors.blue,
+      Colors.red,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.pink,
+      Colors.indigo,
+      Colors.amber,
+      Colors.cyan,
+    ];
+
     return ListView.builder(
       itemCount: 10,
       itemBuilder: (context, index) {
         return ListTile(
           leading: CircleAvatar(
-            backgroundColor: Colors.blueGrey,
-            child: Text('${index % 2 == 0 ? 'A' : 'B'}', style: const TextStyle(color: Colors.white)),
+            backgroundColor: avatarColors[index % avatarColors.length],
+            child: const Icon(Icons.person, color: Colors.white),
           ),
           title: Text(index % 2 == 0 ? 'Friend Name $index' : 'Group Chat $index'),
           subtitle: const Text('Last message preview...'),
@@ -84,50 +162,6 @@ class ChatListContent extends StatelessWidget {
           },
         );
       },
-    );
-  }
-}
-
-class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Color(0xFF527DA3)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 40, color: Color(0xFF527DA3)),
-                ),
-                SizedBox(height: 8),
-                Text('John Doe', style: TextStyle(color: Colors.white, fontSize: 18)),
-                Text('+1 123 456 7890', style: TextStyle(color: Colors.white70, fontSize: 14)),
-              ],
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.group),
-            title: const Text('New Group'),
-            onTap: () => Navigator.pop(context),
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/profile');
-            },
-          ),
-        ],
-      ),
     );
   }
 }
